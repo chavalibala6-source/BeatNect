@@ -1,0 +1,13 @@
+.git
+.antigravitycli
+redis-data
+data
+files
+ansible
+nginx
+k8s
+__pycache__
+*.db
+*.sql
+*.pem
+*.key

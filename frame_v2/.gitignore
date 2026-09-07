@@ -1,0 +1,12 @@
+.antigravitycli/
+.codex
+__pycache__/
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+backup.sql
+data/
+redis-data/
