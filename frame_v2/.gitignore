@@ -10,3 +10,6 @@ __pycache__/
 backup.sql
 data/
 redis-data/
+*.deb
+kubectl
+kubectl.sha256

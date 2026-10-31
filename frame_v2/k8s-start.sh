@@ -5,7 +5,7 @@
 
 set -e
 
-cd ~/frame_v2
+cd /home/bala/BeatNect/frame_v2
 
 echo "🚀 Starting Frame V2 Kubernetes ($(date))"
 

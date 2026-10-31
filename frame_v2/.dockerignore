@@ -4,7 +4,7 @@ redis-data
 data
 files
 ansible
-nginx
+nginx/local-https.conf
 k8s
 __pycache__
 *.db

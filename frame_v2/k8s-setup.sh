@@ -6,7 +6,8 @@
 
 set -e
 
-cd /Users/bala/frame_v2
+
+cd   /home/bala/BeatNect/frame_v2
 
 echo "🚀 Frame V2 Kubernetes Setup"
 echo "=============================="
@@ -16,6 +17,12 @@ echo ""
 echo "📦 Building Docker image..."
 docker build --no-cache -t balu051989/frame_v2-web:latest .
 echo "✅ Docker image built"
+echo ""
+
+# Step 1.5: Load image into Minikube
+echo "📥 Loading image into Minikube..."
+minikube image load balu051989/frame_v2-web:latest
+echo "✅ Image loaded into Minikube"
 echo ""
 
 # Step 2: Apply Kubernetes configurations

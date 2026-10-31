@@ -1,0 +1,1425 @@
+/* ==========================================================================
+   Apple Design System & Highlights Showcase Stylesheet
+   NotesLook / BeatNect 2026
+   ========================================================================== */
+
+/* --- CSS Variables & Design Tokens --- */
+.theme-light, body {
+    --aap-stagger-fast: 50;
+    --aap-stagger-slow: 200;
+    --aap-content-delay-fast: 100ms;
+    --aap-content-delay-slow: 150ms;
+    --aap-background-color-alpha: 0.28;
+    --aap-min-height: 56px;
+    --aap-blur: 16px;
+    --aap-margin: 32px;
+    --aap-top-margin: 0;
+    --aap-bubble-gap: 16px;
+    --aap-background-color: rgba(232, 232, 237, 0.78);
+    --aap-background-color-solid: 232 232 237;
+    --aap-inner-glow-color: rgba(0, 0, 0, 0.08);
+    --aap-text-color: rgb(29, 29, 31);
+    --aap-accent-color: rgb(0, 113, 227);
+    --aap-button-hover: rgba(223, 223, 227, 0.7);
+    --aap-button-active: rgba(193, 193, 198, 0.65);
+    --app-nav-bg: rgba(255, 255, 255, 0.78);
+    --app-nav-text: #1d1d1f;
+    --gallery-bg: #f5f5f7;
+    --gallery-card-bg: #ffffff;
+    --gallery-card-border: rgba(0, 0, 0, 0.06);
+    --gallery-headline-color: #1d1d1f;
+}
+
+.theme-dark, body.dark-mode {
+    --aap-background-color: rgba(30, 30, 32, 0.82);
+    --aap-background-color-solid: 30 30 32;
+    --aap-inner-glow-color: rgba(255, 255, 255, 0.12);
+    --aap-text-color: rgb(245, 245, 247);
+    --aap-accent-color: rgb(41, 151, 255);
+    --aap-button-hover: rgba(50, 50, 54, 0.7);
+    --aap-button-active: rgba(70, 70, 75, 0.8);
+    --app-nav-bg: rgba(22, 22, 24, 0.82);
+    --app-nav-text: #f5f5f7;
+    --gallery-bg: #000000;
+    --gallery-card-bg: #151516;
+    --gallery-card-border: rgba(255, 255, 255, 0.1);
+    --gallery-headline-color: #f5f5f7;
+}
+
+:root {
+    --product-viewer-loader-background-color: hsla(0, 0%, 100%, .1);
+    --product-viewer-loader-progress-background-color: rgba(134, 134, 139, .4);
+    --product-viewer-loader-progress-indicator-background-color: #000;
+    --product-viewer-loader-preview-background-color: #fff;
+    --product-viewer-fallback-slide-bg-color: #fff;
+    --product-viewer-height: 760px;
+    --product-viewer-ref-border-radius: 28px;
+    --app-nav-height: 52px;
+}
+
+/* ==========================================================================
+   Clean & Sleek NotesLook App Navigation Bar
+   (No borders, user logo, generous spacing below)
+   ========================================================================== */
+
+.app-global-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-nav-height);
+    background: var(--app-nav-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    z-index: 99999;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* In document view, top navbar and pages scroll naturally with content */
+body:not(.in-videos-mode):not(.in-music-mode) .app-global-nav {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    z-index: 100 !important;
+}
+
+body:not(.in-videos-mode):not(.in-music-mode) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+}
+
+
+
+.app-global-nav-content {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+
+/* Left Brand & Logo (Logo Only, Clean & Compact) */
+.app-brand-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--app-nav-text);
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.app-brand-link:hover {
+    opacity: 0.85;
+    transform: scale(1.05);
+}
+
+.app-brand-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+    display: block;
+}
+
+.app-brand-name {
+    display: none !important;
+}
+
+/* Center Nav Items - Absolute Centering guarantees 0px shift between Docs, Videos & Music */
+.app-nav-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(134, 134, 139, 0.1);
+    padding: 4px;
+    border-radius: 9999px;
+    z-index: 10;
+}
+
+.app-nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--app-nav-text);
+    text-decoration: none;
+    opacity: 0.75;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
+}
+
+.app-nav-item i,
+.app-nav-item svg {
+    width: 16px;
+    height: 16px;
+}
+
+.app-nav-item:hover {
+    opacity: 1;
+    background: rgba(134, 134, 139, 0.15);
+}
+
+.app-nav-item.active {
+    opacity: 1;
+    background: #5b5f97;
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(91, 95, 151, 0.35);
+}
+
+.app-nav-item#navMusicLink.active {
+    background: #ec2020 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(236, 32, 32, 0.4) !important;
+}
+
+/* Right Nav Actions */
+.app-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(134, 134, 139, 0.12);
+    color: var(--app-nav-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.app-nav-btn i,
+.app-nav-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+.app-nav-btn:hover {
+    background: rgba(134, 134, 139, 0.25);
+    transform: scale(1.06);
+}
+
+/* ==========================================================================
+   Instant Theme Switching (Eliminate white flash & microsecond delay)
+   ========================================================================== */
+html.theme-no-transition,
+html.theme-no-transition *,
+html.theme-no-transition *::before,
+html.theme-no-transition *::after,
+body.theme-no-transition,
+body.theme-no-transition *,
+body.theme-no-transition *::before,
+body.theme-no-transition *::after {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ==========================================================================
+   Document View Spacing & Fixed Header Block Architecture
+   ========================================================================== */
+
+#documentView {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    min-height: calc(100vh - var(--app-nav-height, 52px));
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    box-sizing: border-box;
+    overflow: visible;
+    z-index: 10;
+}
+
+body.dark-mode #documentView {
+    background: #121214;
+}
+
+/* ==========================================================================
+   Apple ChapterNav for Documents (Apple-style Tab Bar)
+   ========================================================================== */
+
+.apple-chapternav-bar {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    flex-shrink: 0;
+    z-index: 950;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body.dark-mode .apple-chapternav-bar {
+    background: #121214;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.apple-chapternav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 82px;
+}
+
+.apple-chapternav-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 32px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    padding: 8px 16px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.apple-chapternav-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Document Item */
+.apple-chapternav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+    min-width: 64px;
+    max-width: 120px;
+    padding: 4px 6px;
+    border-radius: 12px;
+    text-decoration: none;
+    opacity: 0.72;
+    transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s ease;
+    position: relative;
+}
+
+.apple-chapternav-item:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.apple-chapternav-item.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Icon Wrap */
+.apple-chapternav-icon-wrap {
+    position: relative;
+    width: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+/* SVG Doc Icon */
+.apple-chapternav-doc-icon {
+    width: 28px;
+    height: 34px;
+    transition: transform 0.2s ease;
+}
+
+.apple-chapternav-doc-icon .doc-body {
+    fill: #ffffff;
+    stroke: rgba(0, 0, 0, 0.25);
+    stroke-width: 1.5;
+    transition: all 0.2s ease;
+}
+
+.apple-chapternav-doc-icon .doc-fold {
+    fill: rgba(0, 0, 0, 0.05);
+    stroke: rgba(0, 0, 0, 0.25);
+    stroke-width: 1.5;
+}
+
+.apple-chapternav-doc-icon .doc-line {
+    stroke: rgba(0, 0, 0, 0.28);
+}
+
+body.dark-mode .apple-chapternav-doc-icon .doc-body {
+    fill: #262629;
+    stroke: rgba(255, 255, 255, 0.22);
+}
+
+body.dark-mode .apple-chapternav-doc-icon .doc-fold {
+    fill: rgba(255, 255, 255, 0.08);
+    stroke: rgba(255, 255, 255, 0.22);
+}
+
+body.dark-mode .apple-chapternav-doc-icon .doc-line {
+    stroke: rgba(255, 255, 255, 0.3);
+}
+
+/* Active State on Icon */
+.apple-chapternav-item.active .apple-chapternav-doc-icon .doc-body {
+    fill: rgba(0, 113, 227, 0.08);
+    stroke: #0071e3;
+    stroke-width: 1.8;
+    filter: drop-shadow(0 2px 6px rgba(0, 113, 227, 0.35));
+}
+
+.apple-chapternav-item.active .apple-chapternav-doc-icon .doc-fold {
+    fill: rgba(0, 113, 227, 0.18);
+    stroke: #0071e3;
+}
+
+.apple-chapternav-item.active .apple-chapternav-doc-icon .doc-line {
+    stroke: #0071e3;
+}
+
+body.dark-mode .apple-chapternav-item.active .apple-chapternav-doc-icon .doc-body {
+    fill: rgba(41, 151, 255, 0.15);
+    stroke: #2997ff;
+    stroke-width: 1.8;
+    filter: drop-shadow(0 2px 8px rgba(41, 151, 255, 0.45));
+}
+
+body.dark-mode .apple-chapternav-item.active .apple-chapternav-doc-icon .doc-fold {
+    fill: rgba(41, 151, 255, 0.25);
+    stroke: #2997ff;
+}
+
+body.dark-mode .apple-chapternav-item.active .apple-chapternav-doc-icon .doc-line {
+    stroke: #2997ff;
+}
+
+/* Close Button on Icon Hover */
+.apple-chapternav-close {
+    position: absolute;
+    top: -5px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(120, 120, 128, 0.35);
+    color: #ffffff;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.apple-chapternav-item:hover .apple-chapternav-close {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.apple-chapternav-close:hover {
+    background: #ff3b30;
+    transform: scale(1.15);
+}
+
+/* Label */
+.apple-chapternav-label {
+    font-size: 12px;
+    line-height: 1.25;
+    font-weight: 400;
+    color: var(--app-nav-text, #1d1d1f);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 105px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+
+.apple-chapternav-item.active .apple-chapternav-label {
+    font-weight: 600;
+    color: var(--aap-accent-color, #0071e3);
+}
+
+/* Badge (Active or Sublabel like Apple "New") */
+.apple-chapternav-badge {
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 500;
+    height: 11px;
+    margin-top: 2px;
+    color: transparent;
+    transition: color 0.2s ease;
+}
+
+.apple-chapternav-badge.is-active-badge {
+    color: #ff9500;
+}
+
+/* Action Items (+ New Doc, Browse) */
+.apple-chapternav-action .action-icon-wrap {
+    background: rgba(134, 134, 139, 0.12);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: var(--app-nav-text, #1d1d1f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.apple-chapternav-action:hover .action-icon-wrap {
+    background: var(--aap-accent-color, #0071e3);
+    color: #ffffff;
+    transform: scale(1.06);
+}
+
+/* Paddle Buttons */
+.chapternav-paddle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #1d1d1f;
+    cursor: pointer;
+    z-index: 10;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    padding: 0;
+}
+
+body.dark-mode .chapternav-paddle {
+    background: rgba(36, 36, 40, 0.92);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f5f5f7;
+}
+
+.chapternav-paddle:hover {
+    transform: translateY(-50%) scale(1.08);
+}
+
+.chapternav-paddle.disabled {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.chapternav-paddle-left {
+    left: 8px;
+}
+
+.chapternav-paddle-right {
+    right: 8px;
+}
+
+/* Top app-header toolbar is moved into the bottom dock */
+.app-header {
+    display: none !important;
+}
+
+/* Document canvas with smooth natural window scrolling */
+#documentView .notepad {
+    flex: 1 1 auto !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    padding: 32px 24px calc(var(--bottom-bar-h, 110px) + 70px) !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+body.dark-mode #documentView .notepad {
+    background: #121214 !important;
+}
+
+/* ==========================================================================
+   Docked Bottom Toolbar & Minimizer
+   ========================================================================== */
+
+.bottom-bar-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 6px 16px !important;
+    pointer-events: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.bottom-bar-row #mainToolbar {
+    pointer-events: auto !important;
+    max-width: calc(100vw - 80px) !important;
+    margin: 0 !important;
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.bottom-bar-row #mainToolbar.hidden {
+    display: none !important;
+}
+
+#toggleButton {
+    pointer-events: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(28px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    color: #1d1d1f !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    flex-shrink: 0 !important;
+}
+
+body.dark-mode #toggleButton {
+    background: rgba(30, 30, 34, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #f5f5f7 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+#toggleButton:hover {
+    transform: scale(1.08) !important;
+    filter: brightness(1.08) !important;
+}
+
+#toggleButton:active {
+    transform: scale(0.96) !important;
+}
+
+#toggleButton i {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.25s ease;
+}
+
+#documentView .paper {
+    max-width: 1140px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: var(--global-card-corner-radius, 28px);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    padding: 44px 56px;
+    box-sizing: border-box;
+}
+
+body.dark-mode #documentView .paper {
+    background: #161617;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Ensure bottom bar and tabs are visible on document canvas ONLY when not in fullscreen mode */
+body:not(.in-videos-mode):not(.in-music-mode):not(.full-screen-active):not(.native-fullscreen-active):not(:fullscreen) .app-bottom-bar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Explicitly hide bottom toolbar and footer in all fullscreen modes on home page */
+body.full-screen-active .app-bottom-bar,
+body.native-fullscreen-active .app-bottom-bar,
+body:fullscreen .app-bottom-bar,
+:fullscreen .app-bottom-bar,
+body.music-fullscreen-active .app-bottom-bar,
+body.full-screen-active .footer,
+body.native-fullscreen-active .footer,
+body:fullscreen .footer,
+:fullscreen .footer {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Ensure document tabs are fully visible */
+.tabs#tabs {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+/* ==========================================================================
+   Music View Spacing Adjustment (Clear from fixed navbar)
+   ========================================================================== */
+
+#musicView {
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.music-shell {
+    padding-top: var(--app-nav-height, 52px) !important;
+    box-sizing: border-box !important;
+}
+
+.music-sidebar {
+    height: 100% !important;
+    padding: 16px 14px 24px 14px !important;
+    box-sizing: border-box !important;
+}
+
+.music-main-viewport {
+    height: 100% !important;
+    padding: 24px 40px calc(var(--music-player-height, 84px) + 40px) 40px !important;
+    box-sizing: border-box !important;
+}
+
+/* ==========================================================================
+   Apple Highlights Showcase Section (#highlights)
+   (Edge-to-Edge with Left & Right Cards Clearly Peeking into View)
+   ========================================================================== */
+
+#videosView {
+    padding-top: calc(var(--app-nav-height) + 28px);
+    min-height: 100vh;
+    background: var(--gallery-bg);
+    box-sizing: border-box;
+}
+
+.section-highlights {
+    width: 100%;
+    position: relative;
+    overflow-x: clip;
+    padding-bottom: 80px;
+}
+
+.section-header {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 24px 24px 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.typography-section-header-headline {
+    font-size: clamp(36px, 5.5vw, 56px);
+    font-weight: 700;
+    color: var(--gallery-headline-color);
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+.section-header-cta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--aap-accent-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.section-header-cta-link:hover {
+    opacity: 0.85;
+    transform: translateX(2px);
+}
+
+/* --- Edge-to-Edge Media Gallery Cards with Left/Right Peek --- */
+.media-gallery-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+
+.gallery.media-gallery {
+    display: flex;
+    gap: 28px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    /* PADDING ensures the active card is centered AND previous/next cards peek on left/right by ~15vw! */
+    padding: 24px calc((100% - 68vw) / 2);
+    box-sizing: border-box;
+}
+
+.gallery.media-gallery::-webkit-scrollbar {
+    display: none;
+}
+
+.card-set.item-container {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Card Width: 68vw on desktop, ensuring 15vw peek on left and 15vw peek on right! */
+.card-container.gallery-item {
+    flex: 0 0 68vw;
+    max-width: 980px;
+    min-width: 320px;
+    scroll-snap-align: center;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    min-height: 480px;
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.3);
+    background: var(--gallery-card-bg);
+    border: 1px solid var(--gallery-card-border);
+    user-select: none;
+    opacity: 0.72;
+    transform: scale(0.93);
+    transform-origin: center center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                opacity 0.4s ease, 
+                box-shadow 0.4s ease, 
+                border-color 0.4s ease;
+}
+
+/* Active card in center zooms into full scale (1.0), full opacity, accent border and prominent shadow */
+.card-container.gallery-item.current {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    border-color: rgba(0, 113, 227, 0.45);
+    box-shadow: 0 36px 80px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 113, 227, 0.25);
+}
+
+body.dark-mode .card-container.gallery-item.current {
+    border-color: rgba(41, 151, 255, 0.6);
+    box-shadow: 0 44px 90px -18px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(41, 151, 255, 0.35);
+}
+
+.card.tile {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes autoFadeOutBtn {
+    0% {
+        opacity: 0.92;
+        pointer-events: auto;
+    }
+    75% {
+        opacity: 0.92;
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Visible & Interactive Remove Button on Video Cards - Auto hides after ~3.2s, re-shows on hover */
+.gallery-card-remove-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 50;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(20, 20, 22, 0.78);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    animation: autoFadeOutBtn 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    transition: opacity 0.25s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.2s ease, border-color 0.2s ease;
+}
+
+.card-container.gallery-item:hover .gallery-card-remove-btn,
+.gallery-card-remove-btn:hover {
+    animation: none;
+    opacity: 0.92 !important;
+    pointer-events: auto !important;
+}
+
+.gallery-card-remove-btn:hover {
+    background: rgba(220, 38, 38, 0.95);
+    border-color: rgba(239, 68, 68, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+    opacity: 1 !important;
+}
+
+.gallery-card-remove-btn svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+
+/* Captions inside the cards */
+.caption-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 28px 36px;
+    pointer-events: none;
+}
+
+.caption-container.pin-top-center {
+    top: 0;
+    text-align: center;
+}
+
+.caption-container.pin-bottom-center {
+    bottom: 0;
+    text-align: center;
+}
+
+.typography-media-card-gallery-headline {
+    font-size: clamp(20px, 2.6vw, 30px);
+    font-weight: 600;
+    color: var(--gallery-headline-color);
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin: 0;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.gradient-text-apple-intelligence {
+    background: linear-gradient(90deg, #d82b6b, #9333ea, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Media Block & Video Elements */
+.media-block.media-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.media-block video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: none;
+    display: block;
+}
+
+.media-block iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* ==========================================================================
+   All-Access-Pass (AAP) Floating Controls
+   ========================================================================== */
+
+.all-access-pass__container {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 20;
+    margin-top: 16px;
+}
+
+.all-access-pass.aap-media-card-gallery {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--aap-bubble-gap, 16px);
+    background: var(--aap-background-color);
+    backdrop-filter: blur(var(--aap-blur, 16px));
+    -webkit-backdrop-filter: blur(var(--aap-blur, 16px));
+    border-radius: 9999px;
+    padding: 8px 18px;
+    min-height: var(--aap-min-height, 56px);
+    box-shadow: 0 8px 32px var(--aap-inner-glow-color), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    transition: all 0.25s ease;
+}
+
+/* Timed Dotnav */
+.dotnav-items {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dotnav-item {
+    display: inline-flex;
+    align-items: center;
+}
+
+.dotnav-link {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: rgba(134, 134, 139, 0.45);
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.dotnav-link:hover {
+    background: rgba(134, 134, 139, 0.7);
+    transform: scale(1.15);
+}
+
+.dotnav-item.current .dotnav-link {
+    width: 44px;
+    height: 8px;
+    border-radius: 9999px;
+    background: rgba(134, 134, 139, 0.35);
+}
+
+/* Active Progress Fill */
+.dotnav-item.current .dot-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: var(--aap-text-color);
+    border-radius: inherit;
+    transition: width 0.12s linear;
+}
+
+/* Play/Pause Button */
+.play-pause-button.aap-media-card-gallery__button {
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    color: var(--aap-text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    padding: 0;
+}
+
+.play-pause-button.aap-media-card-gallery__button:hover {
+    background: var(--aap-button-hover);
+    transform: scale(1.06);
+}
+
+.play-pause-button.aap-media-card-gallery__button:active {
+    background: var(--aap-button-active);
+    transform: scale(0.96);
+}
+
+.play-pause-button svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+.play-pause-button .pause-icon {
+    display: none;
+}
+
+.play-pause-button.is-playing .play-icon {
+    display: none;
+}
+
+.play-pause-button.is-playing .pause-icon {
+    display: block;
+}
+
+/* Paddle Nav Arrows (Desktop Glide) */
+.gallery-paddle-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--aap-background-color);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--aap-text-color);
+    cursor: pointer;
+    z-index: 25;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.gallery-paddle-btn:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.08);
+    background: var(--aap-button-hover);
+}
+
+.gallery-paddle-prev {
+    left: 24px;
+}
+
+.gallery-paddle-next {
+    right: 24px;
+}
+
+/* Visually Hidden Helper */
+.visuallyhidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 834px) {
+    .gallery.media-gallery {
+        padding: 20px 8vw;
+    }
+    .card-container.gallery-item {
+        flex: 0 0 84vw;
+        min-height: 360px;
+    }
+    .typography-section-header-headline {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 600px) {
+    .app-global-nav-content {
+        padding: 0 12px;
+    }
+    .app-nav-center {
+        gap: 4px;
+        padding: 3px;
+    }
+    .app-nav-item {
+        padding: 5px 12px;
+        font-size: 12px;
+        gap: 4px;
+    }
+    .app-nav-btn {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Ensure mini music player is strictly hidden outside /music */
+body:not(.in-music-mode) #musicGlobalPlayerBar,
+body.in-videos-mode #musicGlobalPlayerBar {
+    display: none !important;
+}
+
+/* ==========================================================================
+   Image Carousel Native Fullscreen & Edge-to-Edge Immersive Mode
+   ========================================================================== */
+
+.image-carousel-container:fullscreen,
+.image-carousel-container:-webkit-full-screen,
+.image-carousel-container.is-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 999999 !important;
+    background: #000000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+body.image-fullscreen-active {
+    overflow: hidden !important;
+}
+
+body.image-fullscreen-active .app-global-nav,
+body.image-fullscreen-active .apple-chapternav-bar,
+body.image-fullscreen-active .app-bottom-bar,
+body.image-fullscreen-active .footer {
+    display: none !important;
+}
+
+.image-carousel-container:fullscreen .image-row,
+.image-carousel-container:-webkit-full-screen .image-row,
+.image-carousel-container.is-fullscreen .image-row {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    max-height: 100dvh !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    align-items: center !important;
+}
+
+.image-carousel-container:fullscreen .image-container,
+.image-carousel-container:-webkit-full-screen .image-container,
+.image-carousel-container.is-fullscreen .image-container {
+    height: 100% !important;
+    width: 100vw !important;
+    flex: 0 0 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 0 !important;
+}
+
+.image-carousel-container:fullscreen .image-card,
+.image-carousel-container:-webkit-full-screen .image-card,
+.image-carousel-container.is-fullscreen .image-card {
+    height: 100% !important;
+    max-height: 100dvh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    aspect-ratio: auto !important;
+    background: transparent !important;
+}
+
+.image-carousel-container:fullscreen .image-card img,
+.image-carousel-container:-webkit-full-screen .image-card img,
+.image-carousel-container.is-fullscreen .image-card img {
+    max-height: 92dvh !important;
+    max-width: 96vw !important;
+    border-radius: 6px !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+.image-controls {
+    position: relative !important;
+    z-index: 2000 !important;
+}
+
+.image-row {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.image-controls .img-more {
+    position: relative !important;
+    z-index: 2001 !important;
+}
+
+.image-controls .img-menu {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: calc(100% + 14px) !important;
+    min-width: 210px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35) !important;
+    padding: 8px !important;
+    z-index: 9999999 !important;
+}
+
+body.dark-mode .image-controls .img-menu,
+.image-carousel-container.is-fullscreen .image-controls .img-menu,
+.image-carousel-container:fullscreen .image-controls .img-menu {
+    background: rgba(26, 26, 30, 0.96) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65) !important;
+}
+
+.image-controls .img-menu.open {
+    display: block !important;
+}
+
+.image-carousel-container:fullscreen .image-controls,
+.image-carousel-container:-webkit-full-screen .image-controls,
+.image-carousel-container.is-fullscreen .image-controls {
+    position: absolute !important;
+    bottom: 24px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 999999 !important;
+    margin: 0 !important;
+    background: rgba(24, 24, 28, 0.78) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 999px !important;
+    padding: 6px 14px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+.image-fullscreen-trigger {
+    position: absolute;
+    top: 12px;
+    right: 54px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-fullscreen-trigger i {
+    width: 15px;
+    height: 15px;
+}
+
+.image-container:hover .image-fullscreen-trigger,
+.image-container:focus-within .image-fullscreen-trigger,
+.image-carousel-container.is-fullscreen .image-fullscreen-trigger {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .image-fullscreen-trigger {
+        opacity: 0.85;
+        transform: scale(1);
+    }
+}
+
+/* ==========================================================================
+   Pinch-to-Zoom & Pan Styles for Touch Devices (iPhone, iPad, Tablets)
+   ========================================================================== */
+
+.image-row.is-pinching {
+    overflow-x: hidden !important;
+    scroll-snap-type: none !important;
+    touch-action: none !important;
+}
+
+.image-card {
+    touch-action: pan-y pinch-zoom;
+}
+
+.image-card.is-zoomed {
+    touch-action: none !important;
+    z-index: 10 !important;
+}
+
+.image-card.is-zoomed img {
+    cursor: grab;
+    will-change: transform;
+}
+
+.image-card.is-zoomed img:active {
+    cursor: grabbing;
+}
+

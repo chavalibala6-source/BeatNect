@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "beatnect-codebase": {
+      "command": "python3",
+      "args": [
+        "/home/bala/BeatNect/frame_v2/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_NAME": "notepad",
+        "DB_USER": "notepad",
+        "DB_PASSWORD": "notepad"
+      }
+    }
+  }
+}

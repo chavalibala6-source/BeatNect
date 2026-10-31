@@ -3,7 +3,7 @@
 # Script to start Docker containers and optionally watch for changes
 # Run this at startup or manually to initialize the app
 
-cd /Users/bala/frame_v2
+cd /Users/bala/BeatNect/frame_v2
 
 echo "🚀 Starting frame_v2 Docker containers..."
 

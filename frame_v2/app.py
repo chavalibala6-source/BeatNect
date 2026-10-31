@@ -1,5 +1,7 @@
 import json
+import datetime
 import psycopg2
+import re
 from flask import Flask, request, jsonify, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 import os
@@ -20,6 +22,32 @@ def clean_db_string(val):
     if isinstance(val, str):
         return val.replace('\x00', '').strip()
     return val
+
+FILENAME_TRACK_REGEXES = [
+    # "01 - Artist - Title" or "Artist - Title"
+    re.compile(r"^(?:(?:\d{1,3})[.\s_-]+)?(?P<artist>[^-\n\t]+?)\s*[-–—]\s*(?P<title>[^(\[\n\t]+)(?:\s*[({\[](?:feat\.|ft\.|album:)?\s*(?P<extra>[^)\]}]+)[)\]}])?", re.IGNORECASE),
+    # "Artist - Album - 01 - Title" or "Artist - Album - Title"
+    re.compile(r"^(?P<artist>[^-\n\t]+?)\s*[-–—]\s*(?P<album>[^-\n\t]+?)\s*[-–—]\s*(?:(?:\d{1,3})[.\s_-]+)?(?P<title>[^.\n\t]+)", re.IGNORECASE)
+]
+
+def extract_metadata_from_filename(filename):
+    if not filename:
+        return None, None, None
+    clean_name = os.path.splitext(filename)[0].replace('_', ' ').strip()
+    # Strip common promo site watermarks
+    clean_name = re.sub(r'(?:[-_\s]*(?:SenSongsMp3|PenduJatt|Naasongs|SongsPK|PagalWorld|Mp3Mad|DJMaza)[\w.]*)+', '', clean_name, flags=re.IGNORECASE).strip()
+    clean_name = re.sub(r'^(?:(?:\d{1,3})[.\s_-]+)+', '', clean_name).strip()
+    clean_name = re.sub(r'\s*[-–—]\s*$', '', clean_name).strip()
+
+    for pattern in FILENAME_TRACK_REGEXES:
+        match = pattern.match(clean_name)
+        if match:
+            group_dict = match.groupdict()
+            artist = group_dict.get('artist', '').strip() or None
+            title = group_dict.get('title', '').strip() or clean_name
+            album = group_dict.get('album', '').strip() or None
+            return artist, album, title
+    return None, None, clean_name
 
 # Store uploads on shared volume to work across replicas
 UPLOAD_DIR = os.path.join(app.root_path, "data", "uploads")
@@ -90,7 +118,8 @@ def extract_m4a_artwork(file_path):
                         mime_type = 'image/png'
                     elif pic_data.startswith(b'GIF89a') or pic_data.startswith(b'GIF87a'):
                         mime_type = 'image/gif'
-                    return pic_data, mime_type
+                    if pic_data and len(pic_data) >= 64:
+                        return pic_data, mime_type
     except Exception as e:
         print(f"Error extracting M4A artwork: {e}")
     return None
@@ -140,7 +169,8 @@ def extract_mp3_artwork(file_path):
                                 pic_data_start = desc_end + 2 if desc_end != -1 else desc_start
                             
                             picture_data = frame_body[pic_data_start:]
-                            return picture_data, mime_type
+                            if picture_data and len(picture_data) >= 64:
+                                return picture_data, mime_type
                 
                 offset += 10 + frame_size
     except Exception as e:
@@ -377,6 +407,48 @@ def init_db():
                 ADD COLUMN IF NOT EXISTS album TEXT
             """)
             cur.execute("""
+                ALTER TABLE music_tracks
+                ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            """)
+            cur.execute("""
+                UPDATE music_tracks
+                SET created_at = uploaded_at
+                WHERE created_at IS NULL AND uploaded_at IS NOT NULL
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_music_tracks_artist
+                ON music_tracks (artist)
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_music_tracks_album
+                ON music_tracks (album)
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_music_tracks_uploaded_at
+                ON music_tracks (uploaded_at DESC)
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_music_tracks_created_at
+                ON music_tracks (created_at DESC)
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_music_tracks_doc_name
+                ON music_tracks (doc_name)
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS showcase_videos (
+                    id SERIAL PRIMARY KEY,
+                    video_id TEXT NOT NULL UNIQUE,
+                    title TEXT DEFAULT '',
+                    sort_order INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_showcase_videos_order
+                ON showcase_videos (sort_order ASC, created_at ASC)
+            """)
+            cur.execute("""
                 INSERT INTO sync_state (id, last_mod)
                 VALUES (1, CURRENT_TIMESTAMP)
                 ON CONFLICT (id) DO NOTHING
@@ -386,14 +458,14 @@ def init_db():
             # Self-healing routine to extract missing artwork/artist/album for existing tracks
             try:
                 cur.execute("""
-                    SELECT id, storage_name, mime, artwork_url, artist, album
+                    SELECT id, storage_name, mime, artwork_url, artist, album, original_name
                     FROM music_tracks
                     WHERE artwork_url IS NULL OR artwork_url = '' OR artist IS NULL OR artist = '' OR album IS NULL OR album = ''
                 """)
                 missing_tracks = cur.fetchall()
                 if missing_tracks:
                     print(f"Found {len(missing_tracks)} existing tracks with missing artwork, artist, or album. Starting extraction...")
-                    for track_id, storage_name, mime, old_art, old_artist, old_album in missing_tracks:
+                    for track_id, storage_name, mime, old_art, old_artist, old_album, orig_name in missing_tracks:
                         dest_path = os.path.join(FILE_UPLOAD_DIR, storage_name)
                         if not os.path.exists(dest_path):
                             continue
@@ -425,6 +497,10 @@ def init_db():
                                 artist = extract_mp3_artist(dest_path)
                             elif mime in ["audio/mp4", "audio/x-m4a"] or ext in [".m4a", ".mp4"]:
                                 artist = extract_m4a_artist(dest_path)
+                            if not artist or artist == '':
+                                fb_artist, fb_album, _ = extract_metadata_from_filename(orig_name or storage_name)
+                                if fb_artist:
+                                    artist = fb_artist
                             if artist:
                                 artist = clean_db_string(artist)
                                 
@@ -433,6 +509,10 @@ def init_db():
                                 album = extract_mp3_album(dest_path)
                             elif mime in ["audio/mp4", "audio/x-m4a"] or ext in [".m4a", ".mp4"]:
                                 album = extract_m4a_album(dest_path)
+                            if not album or album == '':
+                                _, fb_album, _ = extract_metadata_from_filename(orig_name or storage_name)
+                                if fb_album:
+                                    album = fb_album
                             if album:
                                 album = clean_db_string(album)
                                 
@@ -460,6 +540,19 @@ def init_db():
                     print(f"Successfully converted {updated_count} absolute artwork URLs to relative paths.")
             except Exception as ex:
                 print(f"Error converting absolute artwork URLs to relative: {ex}")
+
+            # Clean up any missing or 0-byte artwork files to use default fallback
+            try:
+                cur.execute("SELECT id, artwork_url FROM music_tracks WHERE artwork_url LIKE '/static/uploads/artwork/%'")
+                rows = cur.fetchall()
+                for t_id, a_url in rows:
+                    a_name = os.path.basename(a_url.split("?")[0])
+                    a_path = os.path.join(ARTWORK_DIR, a_name)
+                    if not os.path.exists(a_path) or os.path.getsize(a_path) < 64:
+                        cur.execute("UPDATE music_tracks SET artwork_url = '/static/images/music_thumb.jpg?v=3' WHERE id = %s", (t_id,))
+                conn.commit()
+            except Exception as ex:
+                print(f"Error cleaning up empty artwork entries: {ex}")
 
 redis_client = None
 if redis:
@@ -513,6 +606,9 @@ def invalidate_list_cache():
     invalidate_cache("doc_list")
 
 @app.route("/")
+@app.route("/docs")
+@app.route("/music")
+@app.route("/videos")
 def index():
     response = send_from_directory("templates", "index.html")
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -522,7 +618,9 @@ def index():
 
 @app.route("/static/<path:filename>")
 def static_files(filename):
-    return send_from_directory("static", filename)
+    resp = send_from_directory("static", filename)
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
 
 @app.route("/manifest.webmanifest")
 @app.route("/manifest.json")
@@ -632,7 +730,16 @@ def delete_file():
 
 @app.route('/last_modified')
 def last_modified():
-    return 'ok', 200
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT last_mod FROM sync_state WHERE id=1")
+                row = cur.fetchone()
+                if row and row[0]:
+                    return jsonify({"last_mod": row[0].isoformat()})
+    except Exception as e:
+        print(f"Error in last_modified: {e}")
+    return jsonify({"last_mod": None})
 
 @app.route("/upload_video", methods=["POST", "OPTIONS"])
 def upload_video():
@@ -809,6 +916,13 @@ def upload_file():
     except Exception as e:
         print(f"Error extracting artwork/artist/album for {storage_name}: {e}")
 
+    if not artist or artist == '':
+        fallback_artist, fallback_album, _ = extract_metadata_from_filename(safe_name)
+        if fallback_artist:
+            artist = fallback_artist
+        if not album and fallback_album:
+            album = fallback_album
+
     if artist:
         artist = clean_db_string(artist)
     if album:
@@ -827,6 +941,7 @@ def upload_file():
             ))
             conn.commit()
 
+    now_iso = datetime.datetime.utcnow().isoformat()
     return jsonify({
         "id": track_id,
         "url": public_url,
@@ -834,9 +949,11 @@ def upload_file():
         "name": safe_name,
         "size": size,
         "mime": mimetype,
-        "artwork_url": artwork_url,
+        "artwork_url": artwork_url or "/static/images/music_thumb.jpg?v=3",
         "artist": artist,
-        "album": album
+        "album": album,
+        "uploaded_at": now_iso,
+        "created_at": now_iso
     })
 
 
@@ -918,34 +1035,127 @@ def delete_pdf_highlight(highlight_id):
     return jsonify({"status": "deleted" if deleted else "not found"})
 
 
-@app.route("/music_tracks")
-def list_music_tracks():
-    doc_name = request.args.get("doc") or "global"
+@app.route("/showcase_videos", methods=["GET", "POST"])
+def showcase_videos_api():
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        video_id = (data.get("video_id") or data.get("id") or "").strip()
+        title = (data.get("title") or "").strip()
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO showcase_videos (video_id, title, sort_order)
+                    VALUES (%s, %s, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM showcase_videos))
+                    ON CONFLICT (video_id) DO UPDATE
+                    SET title = CASE WHEN EXCLUDED.title <> '' THEN EXCLUDED.title ELSE showcase_videos.title END
+                    RETURNING id, video_id, title, sort_order, created_at
+                """, (video_id, title))
+                row = cur.fetchone()
+                conn.commit()
+        return jsonify({
+            "status": "ok",
+            "video": {
+                "id": row[0],
+                "video_id": row[1],
+                "title": row[2],
+                "sort_order": row[3],
+                "created_at": row[4].isoformat() if row[4] else None
+            }
+        }), 201
+
+    # GET
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, original_name, storage_name, size, mime, uploaded_at, artwork_url, artist, album
-                FROM music_tracks
-                WHERE doc_name = %s
-                ORDER BY uploaded_at ASC
-            """, (doc_name,))
+                SELECT id, video_id, title, sort_order, created_at
+                FROM showcase_videos
+                ORDER BY sort_order ASC, created_at ASC
+            """)
+            rows = cur.fetchall()
+
+    videos = [{
+        "id": r[0],
+        "video_id": r[1],
+        "title": r[2],
+        "sort_order": r[3],
+        "created_at": r[4].isoformat() if r[4] else None
+    } for r in rows]
+    return jsonify({"videos": videos})
+
+
+@app.route("/showcase_videos/<path:video_ident>", methods=["DELETE"])
+def delete_showcase_video(video_ident):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            if video_ident.isdigit():
+                cur.execute("DELETE FROM showcase_videos WHERE id = %s OR video_id = %s", (int(video_ident), video_ident))
+            else:
+                cur.execute("DELETE FROM showcase_videos WHERE video_id = %s", (video_ident,))
+            deleted = cur.rowcount
+            conn.commit()
+    return jsonify({"status": "deleted" if deleted else "not found"})
+
+
+@app.route("/music_tracks")
+def list_music_tracks():
+    doc_name = request.args.get("doc")
+    scope = (request.args.get("scope") or "").lower()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            if scope == "all" or not doc_name or doc_name.lower() in ["all", "*"]:
+                cur.execute("""
+                    SELECT id, original_name, storage_name, size, mime, uploaded_at, artwork_url, artist, album, created_at
+                    FROM music_tracks
+                    ORDER BY COALESCE(created_at, uploaded_at) DESC
+                """)
+            else:
+                cur.execute("""
+                    SELECT id, original_name, storage_name, size, mime, uploaded_at, artwork_url, artist, album, created_at
+                    FROM music_tracks
+                    WHERE doc_name = %s
+                    ORDER BY COALESCE(created_at, uploaded_at) DESC
+                """, (doc_name,))
             rows = cur.fetchall()
     base_url = get_public_base_url()
-    return jsonify([
-        {
+    results = []
+    for row in rows:
+        artist_val = row[7]
+        album_val = row[8]
+        if not artist_val or not album_val:
+            fb_artist, fb_album, _ = extract_metadata_from_filename(row[1] or "")
+            if not artist_val and fb_artist:
+                artist_val = fb_artist
+            if not album_val and fb_album:
+                album_val = fb_album
+
+        artwork_val = row[6]
+        if not artwork_val or str(artwork_val).strip() in ["", "None", "null"]:
+            artwork_val = "/static/images/music_thumb.jpg?v=3"
+        elif "/static/uploads/artwork/" in str(artwork_val):
+            art_filename = os.path.basename(str(artwork_val).split("/static/uploads/artwork/")[1].split("?")[0])
+            disk_path = os.path.join(ARTWORK_DIR, art_filename)
+            if not os.path.exists(disk_path) or os.path.getsize(disk_path) < 64:
+                artwork_val = "/static/images/music_thumb.jpg?v=3"
+            else:
+                artwork_val = f"/static/uploads/artwork/{art_filename}"
+
+        results.append({
             "id": row[0],
             "name": row[1],
-            "url": f"{base_url}/static/uploads/files/{row[2]}",
-            "download_url": f"{base_url}/download_file/{row[2]}?name={secure_filename(row[1] or '')}",
+            "url": f"/static/uploads/files/{row[2]}",
+            "download_url": f"/download_file/{row[2]}?name={secure_filename(row[1] or '')}",
             "size": row[3],
             "mime": row[4],
             "uploaded_at": row[5].isoformat() if row[5] else None,
-            "artwork_url": row[6],
-            "artist": row[7],
-            "album": row[8]
-        }
-        for row in rows
-    ])
+            "artwork_url": artwork_val,
+            "artist": artist_val or "Unknown Artist",
+            "album": album_val or "Single / Unknown Album",
+            "created_at": (row[9] or row[5]).isoformat() if (row[9] or row[5]) else None
+        })
+    return jsonify(results)
 
 
 @app.route("/music_tracks/<track_id>", methods=["DELETE"])
@@ -1053,6 +1263,11 @@ def download_images():
 
     return send_file(tmp_path, mimetype="application/zip", as_attachment=True, download_name="images.zip")
 
+try:
+    with app.app_context():
+        init_db()
+except Exception as e:
+    print("Database initialization warning:", e)
+
 if __name__ == "__main__":
-    init_db()
     app.run(host="0.0.0.0", port=5000)
