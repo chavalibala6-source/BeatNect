@@ -579,7 +579,7 @@ body.dark-mode .chapternav-paddle {
     flex-direction: column !important;
     align-items: center !important;
     background: #ffffff !important;
-    padding: 32px 24px calc(var(--bottom-bar-h, 110px) + 70px) !important;
+    padding: 20px 0 calc(var(--bottom-bar-h, 110px) + 70px) !important;
     box-sizing: border-box !important;
     -webkit-overflow-scrolling: touch !important;
 }

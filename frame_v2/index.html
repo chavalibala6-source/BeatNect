@@ -3347,9 +3347,9 @@ body.light-mode .notepad {
             :root {
                 --top-bar-h: 72px;
                 --bottom-bar-h: 110px;
-                --carousel-gap: 0px;
-                --carousel-peek: 0px;
-                --carousel-edge: 15px;
+                --carousel-gap: 0px !important;
+                --carousel-peek: 0px !important;
+                --carousel-edge: 0px !important;
             }
 
             .paper {
@@ -3362,14 +3362,25 @@ body.light-mode .notepad {
             }
 
             /* Mobile Video: End-to-End full width video carousel (no boxy gaps) */
+            #documentView .notepad,
+            .notepad {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
             .video-carousel-container,
             .local-video-carousel-container {
                 width: 100% !important;
                 max-width: 100% !important;
+                min-width: 100% !important;
                 margin: 0 0 16px 0 !important;
                 padding: 0 !important;
             }
 
+            .video-carousel-container .video-row,
+            .local-video-carousel-container .local-video-row,
             .video-row,
             .local-video-row {
                 padding: 0 !important;
@@ -3461,14 +3472,25 @@ body.light-mode .notepad {
 
         /* Portrait Mobile Specific: 100% End-to-End */
         @media (max-width: 480px) and (orientation: portrait) {
+            #documentView .notepad,
+            .notepad {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
             .video-carousel-container,
             .local-video-carousel-container {
                 width: 100% !important;
                 max-width: 100% !important;
+                min-width: 100% !important;
                 margin: 0 0 16px 0 !important;
                 padding: 0 !important;
             }
 
+            .video-carousel-container .video-row,
+            .local-video-carousel-container .local-video-row,
             .video-row,
             .local-video-row {
                 padding: 0 !important;
