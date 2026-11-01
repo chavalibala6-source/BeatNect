@@ -3581,6 +3581,8 @@ body.light-mode .notepad {
                 --carousel-gap: 12px !important;
                 --carousel-peek: 16px !important;
                 --carousel-edge: 16px !important;
+                --landscape-vid-h: min(78vh, min(78dvh, 400px));
+                --landscape-vid-w: min(calc(var(--landscape-vid-h) * (16 / 9)), calc(100vw - 32px));
             }
 
             .video-carousel-container,
@@ -3605,25 +3607,33 @@ body.light-mode .notepad {
                 scroll-snap-type: x mandatory !important;
             }
 
+            .video-row:has(.video-container:only-child),
+            .local-video-row:has(.video-container:only-child) {
+                justify-content: center !important;
+            }
+
             .video-container {
-                flex: 0 0 calc(100% - 32px) !important;
-                width: calc(100% - 32px) !important;
-                min-width: 280px !important;
-                max-width: min(calc(100% - 32px), 840px) !important;
+                flex: 0 0 var(--landscape-vid-w) !important;
+                width: var(--landscape-vid-w) !important;
+                min-width: 0 !important;
+                max-width: calc(100vw - 32px) !important;
                 margin: 0 auto !important;
                 padding: 4px 0 !important;
                 border-radius: 16px !important;
                 scroll-snap-align: center !important;
                 scroll-snap-stop: always !important;
                 scroll-margin: 0 !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
                 box-sizing: border-box !important;
             }
 
             .video-container:only-child {
-                flex: 0 0 calc(100% - 32px) !important;
-                width: calc(100% - 32px) !important;
-                max-width: min(calc(100% - 32px), 840px) !important;
+                flex: 0 0 var(--landscape-vid-w) !important;
+                width: var(--landscape-vid-w) !important;
+                max-width: calc(100vw - 32px) !important;
                 margin: 0 auto !important;
                 padding: 4px 0 !important;
             }
@@ -3631,11 +3641,10 @@ body.light-mode .notepad {
             .video-card {
                 position: relative !important;
                 display: block !important;
-                width: 100% !important;
+                width: var(--landscape-vid-w) !important;
+                height: var(--landscape-vid-h) !important;
                 max-width: 100% !important;
-                min-width: 100% !important;
-                height: auto !important;
-                max-height: min(78vh, 460px) !important;
+                max-height: var(--landscape-vid-h) !important;
                 aspect-ratio: 16 / 9 !important;
                 margin: 0 auto !important;
                 padding: 0 !important;
@@ -3669,8 +3678,8 @@ body.light-mode .notepad {
                 left: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-width: none !important;
-                max-height: none !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
                 border: none !important;
                 border-radius: 16px !important;
                 object-fit: cover !important;
@@ -3688,7 +3697,7 @@ body.light-mode .notepad {
             }
 
             .video-container.cinematic {
-                flex: 0 0 calc(100% - 16px) !important;
+                flex: 0 0 var(--landscape-vid-w) !important;
                 max-width: calc(100% - 16px) !important;
             }
         }
