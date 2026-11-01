@@ -4647,19 +4647,169 @@ body.light-mode .notepad {
 
             if (!toggleButton || !toolbar) return;
 
-            toggleButton.addEventListener('click', () => {
+            // Draggable Floating Minimizer Logic
+            let isDragging = false;
+            let dragJustHappened = false;
+            let startPointerX = 0;
+            let startPointerY = 0;
+            let initialBtnX = 0;
+            let initialBtnY = 0;
+
+            function positionMinimizer(x, y) {
+                const btnW = toggleButton.offsetWidth || 44;
+                const btnH = toggleButton.offsetHeight || 44;
+                const pad = 12;
+                const maxX = window.innerWidth - btnW - pad;
+                const maxY = window.innerHeight - btnH - pad;
+
+                const clampedX = Math.max(pad, Math.min(x, maxX));
+                const clampedY = Math.max(pad, Math.min(y, maxY));
+
+                toggleButton.style.left = `${clampedX}px`;
+                toggleButton.style.top = `${clampedY}px`;
+                toggleButton.style.right = 'auto';
+                toggleButton.style.bottom = 'auto';
+
+                return { x: clampedX, y: clampedY };
+            }
+
+            function loadMinimizerPosition() {
+                try {
+                    const saved = localStorage.getItem('beatnect_minimizer_pos');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+                            if (parsed.x < window.innerWidth && parsed.y < window.innerHeight) {
+                                return parsed;
+                            }
+                        }
+                    }
+                } catch (e) {}
+                // Smart default: bottom right, safely away from video center and controls
+                const defaultX = Math.max(12, window.innerWidth - 64);
+                const defaultY = Math.max(12, window.innerHeight - 90);
+                return { x: defaultX, y: defaultY };
+            }
+
+            function saveMinimizerPosition(x, y) {
+                try {
+                    localStorage.setItem('beatnect_minimizer_pos', JSON.stringify({ x, y }));
+                } catch (e) {}
+            }
+
+            function onPointerDown(e) {
+                if (e.button !== undefined && e.button !== 0) return;
+
+                isDragging = false;
+                dragJustHappened = false;
+                startPointerX = e.clientX;
+                startPointerY = e.clientY;
+
+                const rect = toggleButton.getBoundingClientRect();
+                initialBtnX = rect.left;
+                initialBtnY = rect.top;
+
+                if (toggleButton.setPointerCapture) {
+                    try { toggleButton.setPointerCapture(e.pointerId); } catch (_) {}
+                }
+
+                window.addEventListener('pointermove', onPointerMove, { passive: false });
+                window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
+            }
+
+            function onPointerMove(e) {
+                const dx = e.clientX - startPointerX;
+                const dy = e.clientY - startPointerY;
+
+                if (!isDragging && Math.hypot(dx, dy) > 5) {
+                    isDragging = true;
+                    // If toolbar was open, hide it and switch button to floating minimizer
+                    if (!toolbar.classList.contains('hidden')) {
+                        toolbar.classList.add('hidden');
+                        toggleButton.classList.add('toolbar-minimized');
+                        toggleButton.title = 'Show Toolbar (Drag to reposition)';
+                        toggleButton.setAttribute('aria-label', 'Show Toolbar');
+                        toggleButton.innerHTML = '<i data-lucide="panel-bottom-open"></i>';
+                        lucide.createIcons();
+                    }
+                    toggleButton.classList.add('is-dragging');
+                }
+
+                if (isDragging) {
+                    e.preventDefault();
+                    positionMinimizer(initialBtnX + dx, initialBtnY + dy);
+                }
+            }
+
+            function onPointerUp(e) {
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', onPointerUp);
+                window.removeEventListener('pointercancel', onPointerUp);
+
+                if (toggleButton.releasePointerCapture && e.pointerId) {
+                    try { toggleButton.releasePointerCapture(e.pointerId); } catch (_) {}
+                }
+
+                if (isDragging) {
+                    toggleButton.classList.remove('is-dragging');
+                    const rect = toggleButton.getBoundingClientRect();
+                    const finalPos = positionMinimizer(rect.left, rect.top);
+                    saveMinimizerPosition(finalPos.x, finalPos.y);
+
+                    dragJustHappened = true;
+                    setTimeout(() => { dragJustHappened = false; }, 150);
+                }
+                isDragging = false;
+            }
+
+            toggleButton.addEventListener('pointerdown', onPointerDown);
+
+            window.addEventListener('resize', () => {
+                if (toggleButton.classList.contains('toolbar-minimized')) {
+                    const rect = toggleButton.getBoundingClientRect();
+                    positionMinimizer(rect.left, rect.top);
+                }
+            });
+
+            // If initialized with hidden toolbar, position the minimizer
+            if (toolbar.classList.contains('hidden')) {
+                toggleButton.classList.add('toolbar-minimized');
+                const pos = loadMinimizerPosition();
+                positionMinimizer(pos.x, pos.y);
+            }
+
+            toggleButton.addEventListener('click', (e) => {
+                if (dragJustHappened) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    return;
+                }
+
                 const hidden = toolbar.classList.toggle('hidden');
 
                 // Keep document pages (tabs) visible at all times
                 const tabs = document.getElementById('tabs');
                 if (tabs) tabs.classList.remove('hidden');
 
-                toggleButton.title = hidden ? 'Show Toolbar' : 'Hide Toolbar';
+                toggleButton.title = hidden ? 'Show Toolbar (Drag to reposition)' : 'Hide Toolbar';
                 toggleButton.setAttribute('aria-label', hidden ? 'Show Toolbar' : 'Hide Toolbar');
                 toggleButton.classList.toggle('toolbar-minimized', hidden);
                 toggleButton.innerHTML = hidden
                     ? '<i data-lucide="panel-bottom-open"></i>'
                     : '<i data-lucide="panel-bottom-close"></i>';
+
+                if (hidden) {
+                    // Position floating minimizer at saved or default non-blocking location
+                    const pos = loadMinimizerPosition();
+                    positionMinimizer(pos.x, pos.y);
+                } else {
+                    // Reset inline positions so it cleanly docks in bottom-bar-row
+                    toggleButton.style.left = '';
+                    toggleButton.style.top = '';
+                    toggleButton.style.right = '';
+                    toggleButton.style.bottom = '';
+                }
 
                 // re-render Lucide icons
                 lucide.createIcons();
