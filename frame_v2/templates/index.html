@@ -3347,9 +3347,9 @@ body.light-mode .notepad {
             :root {
                 --top-bar-h: 72px;
                 --bottom-bar-h: 110px;
-                --carousel-gap: 0px !important;
-                --carousel-peek: 0px !important;
-                --carousel-edge: 0px !important;
+                --carousel-gap: 12px !important;
+                --carousel-peek: 14px !important;
+                --carousel-edge: 14px !important;
             }
 
             .paper {
@@ -3361,7 +3361,7 @@ body.light-mode .notepad {
                 line-height: 27px;
             }
 
-            /* Mobile Video: End-to-End full width video carousel (no boxy gaps) */
+            /* Document notepad canvas: no forced outer padding so row padding controls spacing */
             #documentView .notepad,
             .notepad {
                 padding-left: 0 !important;
@@ -3383,25 +3383,25 @@ body.light-mode .notepad {
             .local-video-carousel-container .local-video-row,
             .video-row,
             .local-video-row {
-                padding: 0 !important;
+                padding: 0 14px !important;
                 margin: 0 !important;
                 width: 100% !important;
                 min-width: 100% !important;
                 max-width: 100% !important;
-                gap: 0 !important;
-                scroll-padding: 0 !important;
+                gap: 12px !important;
+                scroll-padding: 0 14px !important;
                 scroll-snap-type: x mandatory !important;
             }
 
             .video-container {
-                flex: 0 0 100% !important;
-                width: 100% !important;
-                min-width: 100% !important;
-                max-width: 100% !important;
-                border-radius: 0 !important;
-                padding: 0 !important;
+                flex: 0 0 calc(100% - 24px) !important;
+                width: calc(100% - 24px) !important;
+                min-width: 260px !important;
+                max-width: calc(100% - 24px) !important;
+                border-radius: 18px !important;
+                padding: 4px 0 !important;
                 margin: 0 !important;
-                scroll-snap-align: start !important;
+                scroll-snap-align: center !important;
                 scroll-snap-stop: always !important;
                 scroll-margin: 0 !important;
                 display: block !important;
@@ -3409,22 +3409,11 @@ body.light-mode .notepad {
             }
 
             .video-container:only-child {
-                flex: 0 0 100% !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .video-container.active,
-            .video-container.is-active {
-                transform: none !important;
-            }
-
-            .video-container.is-active .video-card,
-            .video-container.active .video-card {
-                transform: none !important;
-                box-shadow: none !important;
+                flex: 0 0 calc(100% - 28px) !important;
+                width: calc(100% - 28px) !important;
+                max-width: calc(100% - 28px) !important;
+                margin: 0 auto !important;
+                padding: 4px 0 !important;
             }
 
             .video-card {
@@ -3434,14 +3423,31 @@ body.light-mode .notepad {
                 max-width: 100% !important;
                 min-width: 100% !important;
                 height: auto !important;
-                max-height: none !important;
+                max-height: min(75vh, 480px) !important;
                 aspect-ratio: 16 / 9 !important;
-                margin: 0 !important;
+                margin: 0 auto !important;
                 padding: 0 !important;
-                border-radius: 0 !important;
+                border-radius: 18px !important;
                 overflow: hidden !important;
-                box-shadow: none !important;
+                border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                box-shadow: 0 14px 34px -6px rgba(0, 0, 0, 0.35), 0 6px 18px -2px rgba(0, 0, 0, 0.2) !important;
                 background: #000 !important;
+            }
+
+            body.dark-mode .video-card {
+                border: 1px solid rgba(255, 255, 255, 0.16) !important;
+                box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.75), 0 10px 24px -4px rgba(0, 0, 0, 0.5) !important;
+            }
+
+            .video-container.is-active .video-card,
+            .video-container.active .video-card {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 18px 40px -4px rgba(0, 0, 0, 0.42), 0 8px 20px -2px rgba(0, 0, 0, 0.25) !important;
+            }
+
+            body.dark-mode .video-container.is-active .video-card,
+            body.dark-mode .video-container.active .video-card {
+                box-shadow: 0 24px 50px -6px rgba(0, 0, 0, 0.8), 0 12px 28px -4px rgba(0, 0, 0, 0.6) !important;
             }
 
             .video-card video,
@@ -3454,7 +3460,7 @@ body.light-mode .notepad {
                 max-width: none !important;
                 max-height: none !important;
                 border: none !important;
-                border-radius: 0 !important;
+                border-radius: 18px !important;
                 object-fit: cover !important;
                 background: #000 !important;
                 margin: 0 !important;
@@ -3470,7 +3476,7 @@ body.light-mode .notepad {
             }
         }
 
-        /* Portrait Mobile Specific: 100% End-to-End */
+        /* Portrait Mobile Specific */
         @media (max-width: 480px) and (orientation: portrait) {
             #documentView .notepad,
             .notepad {
@@ -3493,25 +3499,25 @@ body.light-mode .notepad {
             .local-video-carousel-container .local-video-row,
             .video-row,
             .local-video-row {
-                padding: 0 !important;
+                padding: 0 12px !important;
                 margin: 0 !important;
                 width: 100% !important;
                 min-width: 100% !important;
                 max-width: 100% !important;
-                gap: 0 !important;
-                scroll-padding: 0 !important;
+                gap: 10px !important;
+                scroll-padding: 0 12px !important;
                 scroll-snap-type: x mandatory !important;
             }
 
             .video-container {
-                flex: 0 0 100% !important;
-                min-width: 100% !important;
-                max-width: 100% !important;
-                width: 100% !important;
-                border-radius: 0 !important;
+                flex: 0 0 calc(100% - 20px) !important;
+                min-width: 250px !important;
+                max-width: calc(100% - 20px) !important;
+                width: calc(100% - 20px) !important;
+                border-radius: 16px !important;
                 margin: 0 !important;
-                padding: 0 !important;
-                scroll-snap-align: start !important;
+                padding: 4px 0 !important;
+                scroll-snap-align: center !important;
                 scroll-snap-stop: always !important;
                 scroll-margin: 0 !important;
                 display: block !important;
@@ -3519,11 +3525,11 @@ body.light-mode .notepad {
             }
 
             .video-container:only-child {
-                flex: 0 0 100% !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                flex: 0 0 calc(100% - 24px) !important;
+                width: calc(100% - 24px) !important;
+                max-width: calc(100% - 24px) !important;
+                margin: 0 auto !important;
+                padding: 4px 0 !important;
             }
 
             .video-card {
@@ -3535,12 +3541,18 @@ body.light-mode .notepad {
                 height: auto !important;
                 aspect-ratio: 16 / 9 !important;
                 max-height: none !important;
-                margin: 0 !important;
+                margin: 0 auto !important;
                 padding: 0 !important;
-                border-radius: 0 !important;
+                border-radius: 16px !important;
                 overflow: hidden !important;
-                box-shadow: none !important;
+                border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.35), 0 6px 16px -2px rgba(0, 0, 0, 0.2) !important;
                 background: #000 !important;
+            }
+
+            body.dark-mode .video-card {
+                border: 1px solid rgba(255, 255, 255, 0.16) !important;
+                box-shadow: 0 18px 42px -6px rgba(0, 0, 0, 0.75), 0 8px 22px -2px rgba(0, 0, 0, 0.5) !important;
             }
 
             .video-card video,
@@ -3553,7 +3565,7 @@ body.light-mode .notepad {
                 max-width: none !important;
                 max-height: none !important;
                 border: none !important;
-                border-radius: 0 !important;
+                border-radius: 16px !important;
                 object-fit: cover !important;
                 background: #000 !important;
                 margin: 0 !important;
