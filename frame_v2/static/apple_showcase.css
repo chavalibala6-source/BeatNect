@@ -614,6 +614,16 @@ body.dark-mode #documentView .notepad {
     display: none !important;
 }
 
+.footer.hidden,
+.app-bottom-bar:has(#mainToolbar.hidden) .footer,
+body:has(#mainToolbar.hidden) .footer,
+.app-bottom-bar:has(#toggleButton.toolbar-minimized) .footer {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 #toggleButton {
     pointer-events: auto !important;
     display: inline-flex !important;
